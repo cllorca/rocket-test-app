@@ -72,6 +72,11 @@ fn not_found() -> Value {
     json!("Not found!")
 }
 
+#[catch(422)]
+fn unprocessable() -> Value {
+    json!("Error 422! Unprocessable Error!")
+}
+
 async fn run_db_migrations(rocket: rocket::Rocket<rocket::Build>) -> Result<rocket::Rocket<rocket::Build>, rocket::Rocket<rocket::Build>> {
     DbConn::get_one(&rocket).await
         .expect("failed to retrieve database connection")
@@ -95,7 +100,8 @@ async fn main() {
             delete_rustacean
         ])
         .register("/", catchers![
-            not_found
+            not_found,
+            unprocessable
         ])
         .attach(DbConn::fairing())
         .attach(AdHoc::try_on_ignite("Database Migrations", run_db_migrations))
